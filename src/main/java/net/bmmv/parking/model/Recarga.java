@@ -17,9 +17,7 @@ public class Recarga {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_recarga;
 
-    private Long dni_usuario; // (clave foránea, no nulo)
-
-    private String patente_vehiculo;
+    private String patente;
     //@NotEmpty
     //@DecimalMin(value = "0.00f", message = "La recarga no puede ser menor o igual a cero!")
     private float importe;
