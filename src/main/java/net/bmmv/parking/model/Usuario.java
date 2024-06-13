@@ -16,7 +16,7 @@ public class Usuario {
 
     @Id
     //@NotNull @Positive @Size(min = 7,max = 8)
-    private Integer dni;
+    private Long dni;
 
     //@NotNull(message = "El nombre no puede estar vacío") @Size(min=3, max = 255)
     private String nombre;
@@ -34,7 +34,7 @@ public class Usuario {
     private LocalDate fecha_nacimiento;
 
     //@Size(min=7, max = 9)
-    private String patente_vehiculo;
+    private String patente;
 
     //@Size(min=6, message = "La contraseña debe tener al menos 6 caracteres!")
     private String contrasena;

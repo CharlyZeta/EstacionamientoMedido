@@ -17,8 +17,8 @@ public class Recarga {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_recarga;
 
-    private Long id_comercio;// (clave foránea, no nulo)
-    private Long id_usuario; // (clave foránea, no nulo)
+    private Long dni_usuario; // (clave foránea, no nulo)
+
     private String patente_vehiculo;
     //@NotEmpty
     //@DecimalMin(value = "0.00f", message = "La recarga no puede ser menor o igual a cero!")
@@ -30,5 +30,9 @@ public class Recarga {
     @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos
     @JoinColumn(name = "dni") // Clave foránea
     private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos
+    @JoinColumn(name = "id_comercio") // Clave foránea
+    private Comercio comercio;
 
 }

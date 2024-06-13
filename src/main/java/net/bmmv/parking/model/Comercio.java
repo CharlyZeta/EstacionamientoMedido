@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,4 +31,7 @@ public class Comercio {
     enum estado_comercio {ACTIVO,INACTIVO};
     //@NotNull
     private estado_comercio estado;
+
+    @OneToMany(mappedBy = "id_recarga")
+    private List<Recarga> registro_recargas;
 }
