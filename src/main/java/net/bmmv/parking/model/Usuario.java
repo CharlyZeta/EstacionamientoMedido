@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name="usuarios")
+@ToString
 public class Usuario {
 
     @Id
