@@ -2,9 +2,13 @@ package net.bmmv.parking.dataFaker;
 
 import com.github.javafaker.Faker;
 import net.bmmv.parking.model.Usuario;
+import net.bmmv.parking.service.IServiceUsuario;
+import net.bmmv.parking.service.ServiceUsuario;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -13,34 +17,49 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+@Component
 public class usuariosFaker {
-
-    public static List<Usuario> generateUsuarios(int numUsuarios) {
-        Faker faker = new Faker(Locale.forLanguageTag("es-AR"));
+    @Autowired
+    private IServiceUsuario serviceUsuario;
+    public List<Usuario> generateUsuarios(int numUsuarios) {
         List<Usuario> usuarios = new ArrayList<>();
+        Faker faker = new Faker(Locale.forLanguageTag("es-AR"));
         Logger logger = LoggerFactory.getLogger(usuariosFaker.class);
 
         if(numUsuarios>0){
             for (int i = 0; i < numUsuarios; i++) {
-                Usuario usuario = new Usuario();
-
-                usuario.setDni(generateDNI());
-                usuario.setNombre(faker.name().firstName());
-
-                usuario.setApellido(faker.name().lastName());
-                usuario.setDomicilio(generateDomicilio(faker));
-                usuario.setEmail(generateEmail(usuario.getNombre(), usuario.getApellido(), faker.random().nextInt(1, 100)));
-                usuario.setFecha_nacimiento(generateFechaNacimiento(faker));
-                usuario.setPatente(generatePatente());
-                usuario.setContrasena(generateContrasena(faker));
-                usuario.setSaldo_cuenta(generateSaldoCuenta());
+                Usuario usuario = generateUser(faker);
                 usuarios.add(usuario);
-
+                serviceUsuario.guardarUsuario(usuario);
             }
         }
+        logger.info("Creando Usuarios en memoria");
         usuarios.forEach(l -> logger.info(l.toString()));
         return usuarios;
     }
+    private Usuario generateUser(Faker faker) {
+        Usuario usuario = new Usuario();
+        usuario.setDni(generateDNI());
+        usuario.setNombre(faker.name().firstName());
+        usuario.setApellido(faker.name().lastName());
+        usuario.setDomicilio(generateDomicilio(faker));
+        usuario.setEmail(generateEmail(usuario.getNombre(), usuario.getApellido(), faker.random().nextInt(1, 100)));
+        usuario.setFecha_nacimiento(generateFechaNacimiento(faker));
+        usuario.setPatente(generatePatente());
+        usuario.setContrasena(generateContrasena(faker));
+        usuario.setSaldo_cuenta(generateSaldoCuenta());
+        return usuario;
+    }
+
+    /*
+    * Cargamos todos los usuarios generados en la base de datos en memoria
+    *
+     */
+//    private static void CargarUsariosBase(List<Usuario> usuarios) {
+//       Logger logger = LoggerFactory.getLogger(usuariosFaker.class);
+//       usuarios.forEach(serviceUsuario::guardarUsuario);
+//       logger.info("----> Usuarios cargados en memoria");
+//    }
 
     private static long generateDNI() {
         Random random = new Random();

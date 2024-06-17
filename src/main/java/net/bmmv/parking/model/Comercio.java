@@ -20,7 +20,8 @@ public class Comercio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_comercio;
 
-    //@NotNull @Size(min = 11, max = 11)
+    //@NotNull(message = "El campo CUIT no puede ser nulo y debe tener 11 caracteres!")
+    @Size(min = 11, max = 11)
     private Long cuit;
 
     //@NotNull
