@@ -16,29 +16,32 @@ import java.util.List;
 public class Usuario {
 
     @Id
-    //@NotNull @Positive @Size(min = 7,max = 8)
+    @NotNull(message = "El DNI no puede estar vacío")
+    @Positive
     private Long dni;
 
-    //@NotNull(message = "El nombre no puede estar vacío") @Size(min=3, max = 255)
+    @NotNull(message = "El nombre no puede estar vacío") @Size(min=3, max = 255)
     private String nombre;
 
-    //@NotNull(message = "El apellido no puede estar vacío") @Size(min= 3, max = 255)
+    @NotNull(message = "El apellido no puede estar vacío") @Size(min= 3, max = 255)
     private String apellido;
 
-    //@NotBlank(message = "Debe completar su domicilio") @Size(max = 255)
+    @NotBlank(message = "El domicilio no puede estar vacío") @Size(max = 255)
     private String domicilio;
 
-    //@NotNull(message = "El email no puede estar vacío") @Email @Column(nullable = false)
+    @NotBlank(message = "El email no puede estar vacío") @Email @Column(nullable = false)
     private String email;
 
-    //@NotNull @Past
+    @NotNull @Past
     private LocalDate fecha_nacimiento;
 
-    //@Size(min=7, max = 9)
+    @Size(min=7, max = 9)
     private String patente;
 
-    //@Size(min=6, message = "La contraseña debe tener al menos 6 caracteres!")
+    @NotEmpty(message = "La contraseña no puede estar vacía")
+    @Size(min=6, message = "La contraseña debe tener al menos 6 caracteres!")
     private String contrasena;
+
 
     private float saldo_cuenta;
 

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class usuariosFaker {
@@ -39,11 +40,15 @@ public class usuariosFaker {
     }
     private Usuario generateUser(Faker faker) {
         Usuario usuario = new Usuario();
-        usuario.setDni(generateDNI());
+        long min = 3000000L, max = 48000000L;
+        long randomNumber = ThreadLocalRandom.current().nextLong(min, max + 1);
+        usuario.setDni(randomNumber);
         usuario.setNombre(faker.name().firstName());
         usuario.setApellido(faker.name().lastName());
         usuario.setDomicilio(generateDomicilio(faker));
-        usuario.setEmail(generateEmail(usuario.getNombre(), usuario.getApellido(), faker.random().nextInt(1, 100)));
+        String name = usuario.getNombre().substring(0,1).toLowerCase().replaceAll("[^a-zA-Z0-9]", "");
+        String lastname = usuario.getApellido().toLowerCase().replaceAll("[^a-zA-Z0-9]", "");
+        usuario.setEmail(generateEmail(name,lastname,faker.random().nextInt(1, 50)));
         usuario.setFecha_nacimiento(generateFechaNacimiento(faker));
         usuario.setPatente(generatePatente());
         usuario.setContrasena(generateContrasena(faker));
