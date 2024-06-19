@@ -12,7 +12,7 @@ public interface IServiceUsuario {
 
     public Usuario guardarUsuario(Usuario usuario);
 
-    public void eliminarUsuario(Usuario usuario);
+    public Usuario eliminarUsuario(Usuario usuario);
 
 
 }

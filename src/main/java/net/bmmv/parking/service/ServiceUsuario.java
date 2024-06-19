@@ -28,7 +28,8 @@ public class ServiceUsuario implements IServiceUsuario{
     }
 
     @Override
-    public void eliminarUsuario(Usuario usuario) {
+    public Usuario eliminarUsuario(Usuario usuario) {
         repoUsuario.delete(usuario);
+        return null;
     }
 }

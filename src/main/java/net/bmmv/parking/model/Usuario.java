@@ -18,6 +18,7 @@ public class Usuario {
     @Id
     @NotNull(message = "El DNI no puede estar vacío")
     @Positive
+    //@ValidateDni
     private Long dni;
 
     @NotNull(message = "El nombre no puede estar vacío") @Size(min=3, max = 255)
@@ -32,10 +33,11 @@ public class Usuario {
     @NotBlank(message = "El email no puede estar vacío") @Email @Column(nullable = false)
     private String email;
 
-    @NotNull @Past
+    @NotNull(message = "La fecha de nacimiento no puede estar vacía") @Past
     private LocalDate fecha_nacimiento;
 
     @Size(min=7, max = 9)
+    @NotBlank(message = "La patente no puede estar vacía")
     private String patente;
 
     @NotEmpty(message = "La contraseña no puede estar vacía")
@@ -50,4 +52,5 @@ public class Usuario {
 
     @OneToMany(mappedBy = "id_recarga")
     private List<Recarga> registro_recargas;
+
 }
