@@ -17,6 +17,7 @@ public class ServiceUsuario implements IServiceUsuario{
         return repoUsuario.findAll();
     }
 
+
     @Override
     public Usuario buscarUsuarioPorDni(Long Dni) {
         return repoUsuario.findUsuarioByDni(Dni);

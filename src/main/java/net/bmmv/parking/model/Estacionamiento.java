@@ -7,14 +7,18 @@ import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
+
 import java.time.LocalDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Estacionamiento {
+public class Estacionamiento extends RepresentationModel<Estacionamiento> {
 
     @Id @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,17 +3,19 @@ package net.bmmv.parking.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name="usuarios")
 @ToString
-public class Usuario {
+public class Usuario extends RepresentationModel<Usuario> {
 
     @Id
     @NotNull(message = "El DNI no puede estar vacío")
