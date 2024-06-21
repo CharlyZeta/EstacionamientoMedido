@@ -24,7 +24,7 @@ public class Estacionamiento extends RepresentationModel<Estacionamiento> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_estacionamiento;
 
-    private Long id_patente;
+    //private Long id_patente;
 
     //@NotBlank @Size(min=7, max = 9,message = "La patente debe tener entre 7 y 8 caracteres")
     private String patente_vehiculo;
@@ -40,7 +40,7 @@ public class Estacionamiento extends RepresentationModel<Estacionamiento> {
 
 
     @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos
-    @JoinColumn(name = "id_usuario") // Clave foránea
+    @JoinColumn(name = "dni") // Clave foránea
     private Usuario usuario;
 
 

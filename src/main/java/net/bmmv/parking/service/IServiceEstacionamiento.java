@@ -7,7 +7,10 @@ import java.util.Optional;
 
 public interface IServiceEstacionamiento {
 
-    public List<Estacionamiento> findAll();
-    public Optional<Estacionamiento> getById(Long id);
+    public List<Estacionamiento> ListarTodos();
+
+    //public Optional<Estacionamiento> BuscarPorPatente(String patente);
+    public Estacionamiento guardarEstacionamiento(Estacionamiento estacionamiento);
+
 
 }

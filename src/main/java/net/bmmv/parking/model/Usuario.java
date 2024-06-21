@@ -1,5 +1,6 @@
 package net.bmmv.parking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -15,6 +16,7 @@ import java.util.List;
 @Entity
 @Table(name="usuarios")
 @ToString
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
 public class Usuario extends RepresentationModel<Usuario> {
 
     @Id

@@ -20,7 +20,7 @@ public class ParkingApplication {
 	public CommandLineRunner commandLineRunner() {
 		return args -> {
 			usuariosFaker users = new usuariosFaker();
-			usuariosFaker.generateUsuarios(10);
+			//usuariosFaker.generateUsuarios(10);
 
 
 		};
