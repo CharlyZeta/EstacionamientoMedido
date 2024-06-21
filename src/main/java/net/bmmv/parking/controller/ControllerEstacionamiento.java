@@ -5,6 +5,7 @@ import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
 import net.bmmv.parking.model.Estacionamiento;
 import net.bmmv.parking.model.Usuario;
 import net.bmmv.parking.service.IServiceEstacionamiento;
+import net.bmmv.parking.service.IServiceUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -25,6 +26,8 @@ public class ControllerEstacionamiento {
 
     @Autowired
     private IServiceEstacionamiento serviceEstacionamiento;
+    @Autowired
+    private IServiceUsuario serviceUsuario;
 
     @GetMapping("/")
     public ResponseEntity<List<Estacionamiento>> obtenerEstacionamientos(){
@@ -43,9 +46,17 @@ public class ControllerEstacionamiento {
 //                        .getById(usuarioDTO.getPatente()) implementar método en controlador ControllerEstacionamiento
 //                        .withRel("estacionemiento");
 //        }
+
+        for (Estacionamiento estacionamiento : todos) {
+            Link usuarioLink = WebMvcLinkBuilder.linkTo(
+                    WebMvcLinkBuilder.methodOn(ControllerUsuario.class).obtenerUsuarioPorId(estacionamiento.getUsuario().getDni())
+            ).withRel("usuario");
+            estacionamiento.add(usuarioLink);
+        }
         return new ResponseEntity<>(todos, HttpStatus.OK);
 
     }
+
     @PostMapping("/")
     public ResponseEntity<?> agregarRegistroEstacionamiento(@Valid @RequestBody Estacionamiento estacionamiento, BindingResult result){
         if (result.hasFieldErrors()){
