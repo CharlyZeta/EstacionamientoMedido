@@ -35,7 +35,7 @@ import static org.springframework.hateoas.server.core.WebHandler.linkTo;
 @CrossOrigin(value = "http://localhost:3000")   //para frontend en React
 public class ControllerUsuario {
 
-    private static final Logger logger = LoggerFactory.getLogger(ControllerUsuario.class);
+    static final Logger logger = LoggerFactory.getLogger(ControllerUsuario.class);
 
     @Autowired
     private IServiceUsuario serviceUsuario;

@@ -1,30 +1,26 @@
 package net.bmmv.parking.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name="recargas")
-public class Recarga extends RepresentationModel<Recarga> {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class RecargaDTO extends RepresentationModel<RecargaDTO> {
+
     private Long id_recarga;
 
     private String patente;
-    //@NotEmpty
-    //@PositiveOrZero
-    //@DecimalMin(value = "0.00f", message = "La recarga no puede ser menor o igual a cero!")
+
     private float importe;
 
-    //@NotNull
     private LocalDateTime fecha_hora;
 
     @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos
@@ -35,4 +31,6 @@ public class Recarga extends RepresentationModel<Recarga> {
     @JoinColumn(name = "id_Comercio") // Clave foránea
     private Comercio comercio;
 
+    public RecargaDTO(Recarga recarga) {
+    }
 }

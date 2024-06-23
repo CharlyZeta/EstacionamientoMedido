@@ -1,38 +1,39 @@
 package net.bmmv.parking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="comercios")
-public class Comercio {
+@Table(name="comercios", uniqueConstraints = @UniqueConstraint(columnNames = "cuit" ))
+public class Comercio extends RepresentationModel<Comercio> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_comercio;
 
-    //@NotNull(message = "El campo CUIT no puede ser nulo y debe tener 11 caracteres!")
-    @Size(min = 11, max = 11)
+    @NotNull
+    @Digits(integer = 11, fraction = 0, message = "El campo CUIT debe tener exactamente 11 dígitos")
+    @Positive(message = "El campo CUIT debe ser un número positivo")
     private Long cuit;
 
-    //@NotNull
+    @NotNull
     private String razon_social;
 
-    //@NotBlank
+    @NotBlank
     private String direccion;
-    enum estado_comercio {ACTIVO,INACTIVO};
-    //@NotNull
-    private estado_comercio estado;
+
+    private String estado;
 
     @OneToMany(mappedBy = "id_recarga")
+    @JsonIgnore
     private List<Recarga> registro_recargas;
 }

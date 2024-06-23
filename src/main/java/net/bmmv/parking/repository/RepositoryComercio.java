@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface RepositoryComercio extends JpaRepository<Comercio, Long> {
 
+    public Comercio findByCuit(Long cuit);
 
 }
 

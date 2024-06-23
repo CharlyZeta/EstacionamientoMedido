@@ -52,6 +52,7 @@ public class ControllerEstacionamiento {
                     WebMvcLinkBuilder.methodOn(ControllerUsuario.class).obtenerUsuarioPorId(estacionamiento.getUsuario().getDni())
             ).withRel("usuario");
             estacionamiento.add(usuarioLink);
+
         }
         return new ResponseEntity<>(todos, HttpStatus.OK);
 

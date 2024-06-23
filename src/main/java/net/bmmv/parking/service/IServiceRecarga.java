@@ -7,15 +7,17 @@ public interface IServiceRecarga {
 
     public List<Recarga> listarTodas();
 
-    public List<Recarga> listarRecargasPorPatente(String patente);
+    public RecargaDTO devuelveRecargaDTO(Recarga recarga) throws Exception;
 
-    public List<Recarga> listarRecargasPorUsuario(Usuario usuario);
+    public List<Recarga> listarPorPatente(String patente);
 
-    public List<Recarga> listarRecargasPorComercio(Comercio comercio);
+    public List<Recarga> listarPorUsuario(Long dniUsuario);
+
+    public List<Recarga> listarPorComercio(Long Comercio);
+
 
     public Recarga guardar(Recarga recarga);
 
-    public void eliminarRecarga(Recarga Recarga);
 
 
 }

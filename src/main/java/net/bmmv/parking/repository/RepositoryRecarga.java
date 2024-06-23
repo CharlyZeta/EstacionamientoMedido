@@ -11,9 +11,10 @@ import java.util.List;
 @Repository
 public interface RepositoryRecarga extends JpaRepository<Recarga, Long> {
 
-    List<Recarga> findRecargasByPatente(String patente);
-    List<Recarga> findRecargasByUsuario(Usuario usuario);
-    List<Recarga> findRecargasByComercio(Comercio comercio);
+    List<Recarga> findAllByPatente(String patente);
 
+    List<Recarga> findAllByUsuarioDni(Long dniUsuario);
+
+    List<Recarga> findAllByComercio(Comercio Comercio);
 
 }
