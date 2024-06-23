@@ -19,12 +19,12 @@ public class Recarga extends RepresentationModel<Recarga> {
     private Long id_recarga;
 
     private String patente;
-    //@NotEmpty
-    //@PositiveOrZero
-    //@DecimalMin(value = "0.00f", message = "La recarga no puede ser menor o igual a cero!")
+    @NotEmpty
+    @PositiveOrZero
+    @DecimalMin(value = "0.00f", message = "La recarga no puede ser menor o igual a cero!")
     private float importe;
 
-    //@NotNull
+    @NotNull
     private LocalDateTime fecha_hora;
 
     @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos

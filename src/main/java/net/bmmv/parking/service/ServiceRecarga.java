@@ -1,5 +1,7 @@
 package net.bmmv.parking.service;
 
+import net.bmmv.parking.controller.ControllerComercio;
+import net.bmmv.parking.controller.ControllerRecarga;
 import net.bmmv.parking.controller.ControllerUsuario;
 import net.bmmv.parking.model.*;
 import net.bmmv.parking.repository.RepositoryComercio;
@@ -41,21 +43,19 @@ public class ServiceRecarga implements IServiceRecarga  {
         dto.setImporte(recarga.getImporte());
         dto.setFecha_hora(recarga.getFecha_hora());
         dto.setUsuario(recarga.getUsuario());
-        //dto.setComercio(recarga.getComercio());
+        dto.setComercio(recarga.getComercio());
 
-        Link userLink = WebMvcLinkBuilder.linkTo(ControllerUsuario.class)
-                .slash(dto.getUsuario()).withSelfRel();
-
-//        Link selfLink = WebMvcLinkBuilder.linkTo(ControllerRecarga.class)
-//            .slash(dto.get).withRel("Recarga");
-
-        //Method link: Link al servicio que permitirá navegar hacia la ciudad relacionada a la persona
-//            Link ciudadLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(CiudadRestController.class)
-//                            .getById(pojo.getCiudad().getId()))
-//                    .withRel("ciudad");
-
-//        dto.add(selfLink);
+        // link: Link al servicio que permite consultar los datos del usuario
+        Link userLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ControllerUsuario.class)
+                        .obtenerUsuarioPorId(dto.getUsuario().getDni())).withRel("Usuario");
         dto.add(userLink);
+
+        // link: Link al servicio que permite consultar los datos del comercio
+        Link comercioLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ControllerComercio.class)
+                .consultaComercio(dto.getComercio().getCuit()))
+                .withRel("Comercio");
+        dto.add(comercioLink);
+
         return dto;
     }
 
@@ -74,8 +74,5 @@ public class ServiceRecarga implements IServiceRecarga  {
         return repositoryRecarga.findAllById(Collections.singleton(idComercio));
 
     }
-
-
-
 
 }

@@ -1,6 +1,9 @@
 package net.bmmv.parking.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
 import net.bmmv.parking.model.Comercio;
 import net.bmmv.parking.service.IServiceComercio;
@@ -69,7 +72,7 @@ public class ControllerComercio {
     }
 
     @GetMapping("/")
-    public ResponseEntity<?> consultaComercios() {
+    public ResponseEntity<?> consultaComercios(@NotNull @Digits(integer = 11, fraction = 0, message = "El campo CUIT debe tener exactamente 11 dígitos") @Positive(message = "El campo CUIT debe ser un número positivo") Long cuit) {
         List<Comercio> listaComercios = serviceComercio.listarComercios();
         if (listaComercios.isEmpty())
             throw new RecursoNoEncontradoExcepcion("No existen comercios guardados.");

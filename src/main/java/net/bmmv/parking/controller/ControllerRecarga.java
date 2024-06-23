@@ -10,7 +10,10 @@ import net.bmmv.parking.service.IServiceRecarga;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +31,7 @@ public class ControllerRecarga {
     @Autowired
     private IServiceComercio serviceComercio;
 
-    @GetMapping("/")
+    @GetMapping(value="/", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RecargaDTO>> obtenerRecargas() throws Exception {
         var recargas = serviceRecarga.listarTodas();
         var recargasDTO = new ArrayList<RecargaDTO>();
@@ -36,10 +39,11 @@ public class ControllerRecarga {
         for(Recarga recarga : recargas){
             recargasDTO.add(serviceRecarga.devuelveRecargaDTO(recarga));
         }
+
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
 
-    @GetMapping("/patente/{patente}")
+    @GetMapping(value="/patente/{patente}", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RecargaDTO>> obtenerRecargasPorPatente(@PathVariable String patente) throws Exception {
         var recargas = serviceRecarga.listarPorPatente(patente);
         var recargasDTO = new ArrayList<RecargaDTO>();
@@ -58,7 +62,7 @@ public class ControllerRecarga {
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
 
-    @GetMapping("/dni/{dni}")
+    @GetMapping(value = "/dni/{dni}", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RecargaDTO>> obtenerRecargasPorDniUsuario(@PathVariable Long dni) throws Exception {
         var recargas = serviceRecarga.listarPorUsuario(dni);
         var recargasDTO = new ArrayList<RecargaDTO>();
@@ -72,7 +76,7 @@ public class ControllerRecarga {
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
 
-    @GetMapping("/comercio/{cuit}")
+    @GetMapping( value="/comercio/{cuit}", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RecargaDTO>> obtenerRecargasPorComercio(@PathVariable Long cuit) throws Exception {
         logger.info(cuit.toString());
         Comercio comercio = serviceComercio.buscarComercioPorCuit(cuit);
