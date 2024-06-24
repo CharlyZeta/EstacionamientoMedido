@@ -1,5 +1,6 @@
 package net.bmmv.parking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,10 +26,12 @@ public class RecargaDTO extends RepresentationModel<RecargaDTO> {
 
     @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos
     @JoinColumn(name = "dni") // Clave foránea
+    @JsonIgnore
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos
     @JoinColumn(name = "id_Comercio") // Clave foránea
+    @JsonIgnore
     private Comercio comercio;
 
     public RecargaDTO(Recarga recarga) {

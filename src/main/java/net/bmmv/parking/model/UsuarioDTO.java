@@ -1,5 +1,6 @@
 package net.bmmv.parking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -28,12 +29,11 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> {
 
     private String email;
 
-    private LocalDate fecha_nacimiento;
-
     private String patente;
 
     private float saldo_cuenta;
 
-    private Link estacionamiento;
 
+    public UsuarioDTO(Usuario usuario) {
+    }
 }

@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 public interface RepositoryUsuario extends JpaRepository<Usuario, Long> {
 
     public Usuario findUsuarioByDni(Long Dni);
+
+    public Usuario findUsuarioByPatenteIgnoreCase(String patente);
 }

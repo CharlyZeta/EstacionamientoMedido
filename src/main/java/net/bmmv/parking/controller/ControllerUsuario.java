@@ -3,8 +3,7 @@ package net.bmmv.parking.controller;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.TypedEntityLinks;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import jakarta.validation.Valid;
 import net.bmmv.parking.excepcion.MetodoNoPermitidoExcepcion;
 import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
@@ -39,22 +38,17 @@ public class ControllerUsuario {
 
     @Autowired
     private IServiceUsuario serviceUsuario;
-    @GetMapping("/")
-    public ResponseEntity<List<Usuario>> obtenerUsuarios(){
-        var usuarios = serviceUsuario.ListarUsuarios();
+
+    @GetMapping(value="/", produces = { MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<UsuarioDTO>> obtenerUsuarios() throws Exception{
+        List<Usuario> usuarios = serviceUsuario.ListarUsuarios();
         usuarios.forEach(e -> logger.info(e.toString()));
-        for(Usuario user : usuarios){
-            Long dni = user.getDni();
-            // Crea un link a si mismo
-            Link selfLink = WebMvcLinkBuilder.linkTo(ControllerUsuario.class)
-                .slash(user.getDni())
-                .withSelfRel();
-            user.add(selfLink);
-//            Link parking = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ControllerEstacionamiento.class)
-//                        .getById(usuarioDTO.getPatente()) implementar método en controlador ControllerEstacionamiento
-//                        .withRel("estacionemiento");
+        if(usuarios.isEmpty()){
+            logger.error("No se encuentran usuarios que listar");
+            throw new RecursoNoEncontradoExcepcion("No se encuentran recargas que listar");
         }
-        return new ResponseEntity<List<Usuario>>(usuarios, HttpStatus.OK);
+
+        return new ResponseEntity<>(serviceUsuario.convertirAUsuarioDTO(usuarios), HttpStatus.OK);
     }
 
 
@@ -62,43 +56,14 @@ public class ControllerUsuario {
 
     @GetMapping("/{Dni}")
     public ResponseEntity<?> obtenerUsuarioPorId(@PathVariable Long Dni){
-        UsuarioDTO usuarioDTO = new UsuarioDTO();
         Usuario usuario = serviceUsuario.buscarUsuarioPorDni(Dni);
 
-        usuarioDTO.setDni(usuario.getDni());
-        usuarioDTO.setNombre(usuario.getNombre());
-        usuarioDTO.setApellido(usuario.getApellido());
-        usuarioDTO.setDomicilio(usuario.getDomicilio());
-        usuarioDTO.setEmail(usuario.getEmail());
-        usuarioDTO.setPatente(usuario.getPatente());
-        usuarioDTO.setSaldo_cuenta(usuario.getSaldo_cuenta());
-
-        //usuarioDTO.setEstacionamiento();
-        Estacionamiento estacionamiento = new Estacionamiento();
-        // implementar método en servicioEstacioanmeinto para buscar un registro de estacionamiento OCUPADO
-        // if( patente_ocupa_estacionamiento )
-        //        String estado = "OCUPADO";
-
-
-        Link selfLink = WebMvcLinkBuilder.linkTo(ControllerUsuario.class)
-                .slash(obtenerUsuarios()).withRel("Lista de usuarios");
-//        //Method link: Link al servicio que permitirá navegar hacia la ciudad relacionada a la persona
-//        Link parking = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ControllerEstacionamiento.class)
-////                        .getById(usuarioDTO.getPatente()) implementar método en controlador ControllerEstacionamiento
-//                        .withRel("estacionemiento");
-        usuarioDTO.add(selfLink);
-//        usuarioDTO.add(parking);
 
         if(usuario == null)
             throw new RecursoNoEncontradoExcepcion("No se encontró el usuario con el DNI: " + Dni);
         String patente = usuario.getPatente();
 
-//        usuario
-//                .add(Link.of("/estacionamiento/estado/{patente}"));
-
-//        return ResponseEntity.status(HttpStatus.OK).body(serviceUsuario.buscarUsuarioPorDni(Dni));
-
-        return ResponseEntity.status(HttpStatus.OK).body(usuarioDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(serviceUsuario.devuelveUsuarioDTO(usuario));
     }
 
 
@@ -125,11 +90,12 @@ public class ControllerUsuario {
         usuario.setFecha_nacimiento(usuarioRecibido.getFecha_nacimiento());
         usuario.setDomicilio(usuarioRecibido.getDomicilio());
         usuario.setEmail(usuarioRecibido.getEmail());
+        usuario.setFecha_nacimiento(usuarioRecibido.getFecha_nacimiento());
         usuario.setContrasena(usuarioRecibido.getContrasena());
         usuario.setPatente(usuarioRecibido.getPatente());
         serviceUsuario.guardarUsuario(usuario);
         logger.info("Se le aplicaron cambios al usuario "
-                + usuario.getApellido() + " "
+                + usuario.getNombre() + " "
                 + usuario.getApellido() + " DNI: "
                 + usuario.getDni() );
         return ResponseEntity.ok(usuario);
@@ -140,13 +106,7 @@ public class ControllerUsuario {
         logger.error("Método no permitido para esta operación");
         throw new MetodoNoPermitidoExcepcion("Método no permitido para esta operación");
     }
-    private ResponseEntity<?> validation(BindingResult result) {
-        Map<String, String> errors = new HashMap<>();
-        result.getFieldErrors().forEach(fieldError -> {
-            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-        });
-        return ResponseEntity.badRequest().body(errors);
-    }
+
 
 
     @DeleteMapping("/{dni}")
@@ -168,5 +128,13 @@ public class ControllerUsuario {
             logger.error("Método no permitido para esta operación");
             throw new MetodoNoPermitidoExcepcion("Método no permitido para esta operación");
 
+    }
+
+    private ResponseEntity<?> validation(BindingResult result) {
+        Map<String, String> errors = new HashMap<>();
+        result.getFieldErrors().forEach(fieldError -> {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        });
+        return ResponseEntity.badRequest().body(errors);
     }
 }

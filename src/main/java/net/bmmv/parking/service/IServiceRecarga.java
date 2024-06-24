@@ -15,8 +15,12 @@ public interface IServiceRecarga {
 
     public List<Recarga> listarPorComercio(Long Comercio);
 
+    /*
+    * Toma como parámetro una lista de recargas y devuenve un DTO de recargas
+    */
+    public List<RecargaDTO> convertirARecargaDTO(List<Recarga> recargas);
 
-    public Recarga guardar(Recarga recarga);
+    public Recarga guardar(Recarga recarga) throws Exception;
 
 
 

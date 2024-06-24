@@ -11,6 +11,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class ServiceRecarga implements IServiceRecarga  {
     }
 
     @Override
-    public Recarga guardar(Recarga recarga) {
+    public Recarga guardar(Recarga recarga) throws Exception {
         return repositoryRecarga.save(recarga);
     }
 
@@ -73,6 +74,16 @@ public class ServiceRecarga implements IServiceRecarga  {
     public List<Recarga> listarPorComercio(Long idComercio) {
         return repositoryRecarga.findAllById(Collections.singleton(idComercio));
 
+    }
+
+
+
+    public List<RecargaDTO> convertirARecargaDTO(List<Recarga> recargas){
+        var recargasDTO = new ArrayList<RecargaDTO>();
+        for(Recarga recarga : recargas){
+            recargasDTO.add(devuelveRecargaDTO(recarga));
+        }
+        return recargasDTO;
     }
 
 }
