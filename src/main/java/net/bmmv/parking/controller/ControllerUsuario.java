@@ -45,7 +45,7 @@ public class ControllerUsuario {
         usuarios.forEach(e -> logger.info(e.toString()));
         if(usuarios.isEmpty()){
             logger.error("No se encuentran usuarios que listar");
-            throw new RecursoNoEncontradoExcepcion("No se encuentran recargas que listar");
+            throw new RecursoNoEncontradoExcepcion("No se encuentran usuarios que listar");
         }
 
         return new ResponseEntity<>(serviceUsuario.convertirAUsuarioDTO(usuarios), HttpStatus.OK);

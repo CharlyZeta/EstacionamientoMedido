@@ -24,5 +24,7 @@ public interface IServiceComercio {
     //Metodos extra
     public Comercio buscarComercioPorCuit(Long cuit);
 
+    public Comercio buscarComercioPorId(Long Id);
+
 
 }

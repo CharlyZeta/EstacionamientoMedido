@@ -27,11 +27,11 @@ public class Recarga extends RepresentationModel<Recarga> {
 
     private LocalDateTime fecha_hora;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos
+    @ManyToOne // Relación uno a muchos
     @JoinColumn(name = "dni") // Clave foránea
     private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Relación uno a muchos
+    @ManyToOne // Relación uno a muchos
     @JoinColumn(name = "id_Comercio") // Clave foránea
     private Comercio comercio;
 

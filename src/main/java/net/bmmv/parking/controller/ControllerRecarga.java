@@ -1,7 +1,7 @@
 package net.bmmv.parking.controller;
 
 import jakarta.validation.Valid;
-import net.bmmv.parking.excepcion.MetodoNoPermitidoExcepcion;
+import net.bmmv.parking.excepcion.ErrorInternoDelServidorExcepcion;
 import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
 import net.bmmv.parking.model.Comercio;
 import net.bmmv.parking.model.Recarga;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -95,48 +94,42 @@ public class ControllerRecarga {
         }
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
-    @PostMapping("/")
-    public ResponseEntity guardar( @RequestBody Recarga recarga, BindingResult result) throws Exception{
+    @PostMapping("/{dniRecibido}/{idComercioRecibido}")
+    public ResponseEntity<?> guardar(@Valid @RequestBody Recarga recarga, BindingResult result,
+                                     @PathVariable Long dniRecibido,
+                                     @PathVariable Long idComercioRecibido) throws Exception{
         if (result.hasFieldErrors()){
             return validation(result);
         }
-        logger.info(" ###### INICIANDO CONTROLADOR ##### ");
-        //verificar y asignar el comercio
-        Optional<Comercio> comercioOpt = Optional.of(serviceComercio.consultarComercio(recarga.getComercio().getCuit()));
-        logger.info("ComercioOpt: "+comercioOpt.toString());
-
-        comercioOpt.orElseThrow(() -> {
-            logger.error("No se puede hacer la recarga");
-            return new RecursoNoEncontradoExcepcion("No se permite hacer la recarga");
-        });
-        recarga.setComercio(comercioOpt.get());
-
-        // Verificar y asignar el usuario
-        Optional<Usuario> userOpt =  serviceUsuario.buscarUsuarioPorPatente(recarga.getPatente());
-        logger.info("UserOpt: " + userOpt.toString());
-        Usuario usuario = userOpt.orElseThrow(() -> {
-            logger.error("No se puede hacer la recarga");
-            return new RecursoNoEncontradoExcepcion("La patente no pertenece a ningún usuario");
-        });
-        // toma el usuario de la busqueda Optional positiva anterior y se lo asigna al atributo usuario
-        //recarga.setUsuario(userOpt.get());
-
-        recarga.setUsuario(usuario);
-
         // Asignar la fecha y hora actuales
         logger.info(LocalDateTime.now().toString());
         recarga.setFecha_hora(LocalDateTime.now());
-
+        Optional<Usuario> usuarioOpt = Optional.ofNullable(serviceUsuario.buscarUsuarioPorDni(dniRecibido));
+        usuarioOpt.ifPresent(usuario -> recarga.setUsuario(usuario));
+        //   NUEVO MÉTODO IMPLEMENTADO EN SERVICIO ( BUSCARCOMERCIOPORID()  )
+        Comercio comercio = serviceComercio.buscarComercioPorId(idComercioRecibido);
+        if(comercio==null){
+            throw new RecursoNoEncontradoExcepcion("No se encuentran comercio con el parámetro: " + idComercioRecibido);
+        }else{
+            recarga.setComercio(comercio);
+        }
         // Guardar la recarga y construye la URI de la respuesta
-        Recarga recargaGuardada = serviceRecarga.guardar(recarga);
+        try {
+            Recarga recargaGuardada = serviceRecarga.guardar(recarga);
+            logger.info("Datos de la recarga: " + recarga.toString());
+            
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id_Recarga}")
+                    .buildAndExpand(recargaGuardada.getId_recarga())
+                    .toUri();
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(recargaGuardada.getId_recarga()).toUri();
-
-        logger.info("Datos de la recarga: " + recarga.toString());
-
-        return ResponseEntity.created(location).body(recargaGuardada);
-
+            return ResponseEntity.created(location).body(recargaGuardada);
+        } catch (Exception e) {
+            logger.error("Error al guardar la recarga", e);
+            return ResponseEntity.internalServerError().build();
+        }
+        //return ResponseEntity.created(location).body(recarga);
+        //return new ResponseEntity<>(serviceRecarga.guardar(recarga), HttpStatus.OK);
     }
 
     private ResponseEntity<?> validation(BindingResult result) {

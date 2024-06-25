@@ -55,8 +55,13 @@ public class ServiceComercio implements IServiceComercio{
     @Override
     public Comercio buscarComercioPorCuit(Long cuit) {
         Comercio comercio = repoComercio.findByCuit(cuit);   //Ver implementar Opcional
-
         return comercio;
+    }
+
+    @Override
+    public Comercio buscarComercioPorId(Long id) {
+        Optional<Comercio> comercioOpt =  repoComercio.findComercioById(id);
+        return comercioOpt.orElse(null);
     }
 
 }
