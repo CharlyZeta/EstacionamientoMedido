@@ -21,4 +21,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> ErrorInternoDelServidorExcepcion(ErrorInternoDelServidorExcepcion ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(ConflictoDeRecurso.class)
+    public ResponseEntity<?> ConflictoDeRecurso(ConflictoDeRecurso ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+
 }

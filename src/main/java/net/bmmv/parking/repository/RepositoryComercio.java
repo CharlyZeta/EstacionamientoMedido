@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface RepositoryComercio extends JpaRepository<Comercio, Long> {
 
     public Comercio findByCuit(Long cuit);

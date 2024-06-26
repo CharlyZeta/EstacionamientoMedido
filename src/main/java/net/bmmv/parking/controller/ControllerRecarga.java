@@ -94,10 +94,10 @@ public class ControllerRecarga {
         }
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
-    @PostMapping("/{dniRecibido}/{idComercioRecibido}")
+    @PostMapping("/nueva/{dniRecibido}/{idComercioRecibido}")
     public ResponseEntity<?> guardar(@Valid @RequestBody Recarga recarga, BindingResult result,
                                      @PathVariable Long dniRecibido,
-                                     @PathVariable Long idComercioRecibido) throws Exception{
+                                     @PathVariable Long idComercioRecibido) {
         if (result.hasFieldErrors()){
             return validation(result);
         }
@@ -112,21 +112,28 @@ public class ControllerRecarga {
             throw new RecursoNoEncontradoExcepcion("No se encuentran comercio con el parámetro: " + idComercioRecibido);
         }else{
             recarga.setComercio(comercio);
+            logger.info("---------------------> Cuit del comercio: " + comercio.getCuit());
         }
         // Guardar la recarga y construye la URI de la respuesta
         try {
+            logger.info("---------------------> Datos de la recarga: " + recarga.toString());
             Recarga recargaGuardada = serviceRecarga.guardar(recarga);
-            logger.info("Datos de la recarga: " + recarga.toString());
-            
+            //serviceRecarga.guardar(recarga);
+//            if(recargaGuardada==null) {
+//                logger.info("---------------------> Recarga no realizada!! ");
+//                throw new ErrorInternoDelServidorExcepcion("Recarga no realizada ");
+//            }
+
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id_Recarga}")
                     .buildAndExpand(recargaGuardada.getId_recarga())
                     .toUri();
 
             return ResponseEntity.created(location).body(recargaGuardada);
+            //return ResponseEntity.status(HttpStatus.CREATED).body("*******************************recargaGuardada");
         } catch (Exception e) {
             logger.error("Error al guardar la recarga", e);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         //return ResponseEntity.created(location).body(recarga);
         //return new ResponseEntity<>(serviceRecarga.guardar(recarga), HttpStatus.OK);

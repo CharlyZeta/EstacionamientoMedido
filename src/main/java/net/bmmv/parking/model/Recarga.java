@@ -1,5 +1,6 @@
 package net.bmmv.parking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -29,10 +30,12 @@ public class Recarga extends RepresentationModel<Recarga> {
 
     @ManyToOne // Relación uno a muchos
     @JoinColumn(name = "dni") // Clave foránea
+    @JsonIgnore
     private Usuario usuario;
 
     @ManyToOne // Relación uno a muchos
     @JoinColumn(name = "id_Comercio") // Clave foránea
+    @JsonIgnore
     private Comercio comercio;
 
 }

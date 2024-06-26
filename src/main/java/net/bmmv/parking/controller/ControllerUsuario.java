@@ -1,5 +1,6 @@
 package net.bmmv.parking.controller;
 
+import net.bmmv.parking.excepcion.ConflictoDeRecurso;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.TypedEntityLinks;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -66,14 +67,13 @@ public class ControllerUsuario {
         return ResponseEntity.status(HttpStatus.OK).body(serviceUsuario.devuelveUsuarioDTO(usuario));
     }
 
-
-
     @PostMapping("/")
     public ResponseEntity<?> agregarUsuario(@Valid @RequestBody Usuario usuario, BindingResult result){
         if (result.hasFieldErrors()){
             return validation(result);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(serviceUsuario.guardarUsuario(usuario));
+        Optional<Usuario> usuarioOpt = Optional.ofNullable(serviceUsuario.buscarUsuarioPorDni(usuario.getDni()));
+        throw new ConflictoDeRecurso("El DNI ya existe!");
     }
 
     @PutMapping("/{Dni}")

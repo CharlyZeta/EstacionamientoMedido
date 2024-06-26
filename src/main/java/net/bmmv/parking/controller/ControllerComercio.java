@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import net.bmmv.parking.excepcion.ConflictoDeRecurso;
 import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
 import net.bmmv.parking.model.Comercio;
+import net.bmmv.parking.model.Usuario;
 import net.bmmv.parking.service.IServiceComercio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/comercios")
@@ -31,11 +34,15 @@ public class ControllerComercio {
     @Autowired
     private IServiceComercio serviceComercio;
 
-    @PostMapping("/")
+    @PostMapping("/nuevo")
     public ResponseEntity<?> agregarComercio(@Valid @RequestBody Comercio comercio, BindingResult result){
         if (result.hasFieldErrors()){
             return validation(result);
         }
+        Optional<Comercio> comercioOpt = Optional.ofNullable(serviceComercio.buscarComercioPorCuit(comercio.getCuit()));
+        if(comercioOpt.isPresent())
+            throw new ConflictoDeRecurso("El CUIT ya existe!");
+
         return ResponseEntity.status(HttpStatus.CREATED).body(serviceComercio.guardarComercio(comercio));
     }
 

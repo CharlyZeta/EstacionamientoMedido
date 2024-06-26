@@ -1,4 +1,5 @@
 package net.bmmv.parking.service;
+import jakarta.transaction.Transactional;
 import net.bmmv.parking.model.*;
 
 import java.util.List;
@@ -20,7 +21,8 @@ public interface IServiceRecarga {
     */
     public List<RecargaDTO> convertirARecargaDTO(List<Recarga> recargas);
 
-    public Recarga guardar(Recarga recarga) throws Exception;
+    @Transactional
+    public Recarga guardar(Recarga recarga);
 
 
 

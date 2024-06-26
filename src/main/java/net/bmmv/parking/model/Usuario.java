@@ -1,5 +1,6 @@
 package net.bmmv.parking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -14,9 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="usuarios")
 @ToString
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
+@Table(name="usuarios", uniqueConstraints = @UniqueConstraint(columnNames = "dni" ))
 public class Usuario extends RepresentationModel<Usuario> {
 
     @Id
@@ -52,9 +53,11 @@ public class Usuario extends RepresentationModel<Usuario> {
     private float saldo_cuenta;
 
     @OneToMany(mappedBy = "id_estacionamiento")
+    @JsonIgnore
     private List<Estacionamiento> registro_estacionameinto;
 
     @OneToMany(mappedBy = "id_recarga")
+    @JsonIgnore
     private List<Recarga> registro_recargas;
 
 }

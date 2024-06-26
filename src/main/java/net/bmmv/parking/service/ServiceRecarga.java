@@ -32,7 +32,7 @@ public class ServiceRecarga implements IServiceRecarga  {
     }
 
     @Override
-    public Recarga guardar(Recarga recarga) throws Exception {
+    public Recarga guardar(Recarga recarga)  {
         return repositoryRecarga.save(recarga);
     }
 
