@@ -3,18 +3,21 @@ package net.bmmv.parking.service;
 import net.bmmv.parking.controller.ControllerComercio;
 import net.bmmv.parking.controller.ControllerRecarga;
 import net.bmmv.parking.controller.ControllerUsuario;
+import net.bmmv.parking.excepcion.ErrorInternoDelServidorExcepcion;
+import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
 import net.bmmv.parking.model.*;
 import net.bmmv.parking.repository.RepositoryComercio;
 import net.bmmv.parking.repository.RepositoryRecarga;
+import net.bmmv.parking.repository.RepositoryUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class ServiceRecarga implements IServiceRecarga  {
@@ -23,16 +26,17 @@ public class ServiceRecarga implements IServiceRecarga  {
     private RepositoryRecarga repositoryRecarga;
     @Autowired
     private RepositoryComercio repositoryComercio;
+    @Autowired
+    private RepositoryUsuario repositoryUsuario;
 
     @Override
     public List<Recarga> listarTodas() {
-        List<Recarga> listaDeRecargas = repositoryRecarga.findAll();
         //return repositoryRecarga.findAll(Sort.by(Sort.Direction.ASC, "fecha_Hora"));
-        return listaDeRecargas;
+        return repositoryRecarga.findAll();
     }
 
     @Override
-    public Recarga guardar(Recarga recarga)  {
+    public Recarga guardar(Recarga recarga) throws Exception  {
         return repositoryRecarga.save(recarga);
     }
 
@@ -76,7 +80,17 @@ public class ServiceRecarga implements IServiceRecarga  {
 
     }
 
+    public Recarga buscarRecargaPorId(Long id){
+        return repositoryRecarga.findById(id).orElseThrow();
+    }
 
+    public ResponseEntity<?> validation(BindingResult result) {
+        Map<String, String> errors = new HashMap<>();
+        result.getFieldErrors().forEach(fieldError -> {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        });
+        return ResponseEntity.badRequest().body(errors);
+    }
 
     public List<RecargaDTO> convertirARecargaDTO(List<Recarga> recargas){
         var recargasDTO = new ArrayList<RecargaDTO>();
@@ -86,4 +100,20 @@ public class ServiceRecarga implements IServiceRecarga  {
         return recargasDTO;
     }
 
+    public Recarga inyectarLinkUsuarioYComercio(Recarga recarga, Optional<Usuario> usuarioOpt, Long idComercioRecibido) {
+        // link: Link al servicio que permite consultar los datos del usuario
+        Link userLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ControllerUsuario.class)
+                .obtenerUsuarioPorId(usuarioOpt.get().getDni())).withRel("Usuario: ");
+        recarga.add(userLink);
+
+        // link: Link al servicio que permite consultar los datos del comercio
+        Link comercioLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ControllerComercio.class)
+                        .consultaComercio(idComercioRecibido))
+                .withRel("Comercio");
+        recarga.add(comercioLink);
+
+
+
+        return recarga;
+    }
 }

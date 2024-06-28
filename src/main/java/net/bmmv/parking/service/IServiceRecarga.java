@@ -1,12 +1,17 @@
 package net.bmmv.parking.service;
 import jakarta.transaction.Transactional;
 import net.bmmv.parking.model.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IServiceRecarga {
 
     public List<Recarga> listarTodas();
+
+    public Recarga buscarRecargaPorId(Long id);
 
     public RecargaDTO devuelveRecargaDTO(Recarga recarga) throws Exception;
 
@@ -22,8 +27,10 @@ public interface IServiceRecarga {
     public List<RecargaDTO> convertirARecargaDTO(List<Recarga> recargas);
 
     @Transactional
-    public Recarga guardar(Recarga recarga);
+    public Recarga guardar(Recarga recarga) throws Exception;
 
+    public Recarga inyectarLinkUsuarioYComercio(Recarga recarga, Optional<Usuario> usuarioOpt, Long idComercioRecibido);
 
+    public ResponseEntity<?> validation(BindingResult result);
 
 }

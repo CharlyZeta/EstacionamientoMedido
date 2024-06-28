@@ -94,8 +94,10 @@ public class ControllerComercio {
 
         //HEATOAS INICIO
 
-        Link recargaLink = WebMvcLinkBuilder.linkTo(ControllerRecarga.class)
-                .slash("recargarSaldo").withRel("Cargar saldo");
+        Link recargaLink = WebMvcLinkBuilder.linkTo(ControllerRecarga.class).slash("nueva")
+                .slash("/")
+                .withRel("Cargar saldo");
+//                .slash(Cuit).slash("/").withRel("Cargar saldo");
 
         comercio.add(recargaLink);
 

@@ -13,6 +13,8 @@ import net.bmmv.parking.service.IServiceUsuario;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +47,16 @@ public class ControllerRecarga {
             throw new RecursoNoEncontradoExcepcion("No se encuentran recargas que listar");
         }
         return new ResponseEntity<>(serviceRecarga.convertirARecargaDTO(recargas), HttpStatus.OK);
+    }
+
+    @GetMapping(value="/{id}", produces = { MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<RecargaDTO> obteneRecargaPorId(@Valid @PathVariable Long id) throws Exception {
+        Recarga recarga = serviceRecarga.buscarRecargaPorId(id);
+        if(recarga==null){
+            logger.error("No se encuentran recarga con id: " + id);
+            throw new RecursoNoEncontradoExcepcion("No se encuentra recarga con el id: " + id);
+        }
+        return new ResponseEntity<>(serviceRecarga.devuelveRecargaDTO(recarga), HttpStatus.OK);
     }
 
     @GetMapping(value="/patente/{patente}", produces = { MediaType.APPLICATION_JSON_VALUE})
@@ -94,59 +106,60 @@ public class ControllerRecarga {
         }
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
-    @PostMapping("/nueva/{dniRecibido}/{idComercioRecibido}")
+
+
+    @PostMapping("/nueva/{idComercioRecibido}/{dniRecibido}")
     public ResponseEntity<?> guardar(@Valid @RequestBody Recarga recarga, BindingResult result,
-                                     @PathVariable Long dniRecibido,
-                                     @PathVariable Long idComercioRecibido) {
+                                     @PathVariable Long idComercioRecibido,
+                                     @PathVariable Long dniRecibido ) {
+
         if (result.hasFieldErrors()){
-            return validation(result);
+            return serviceRecarga.validation(result);
         }
-        // Asignar la fecha y hora actuales
-        logger.info(LocalDateTime.now().toString());
+
         recarga.setFecha_hora(LocalDateTime.now());
         Optional<Usuario> usuarioOpt = Optional.ofNullable(serviceUsuario.buscarUsuarioPorDni(dniRecibido));
+        //  VALIDANDO USUARIO
+        if(usuarioOpt==null){
+            throw new RecursoNoEncontradoExcepcion("Usuario no encontrado con el DNI: " + dniRecibido);
+        }
         usuarioOpt.ifPresent(usuario -> recarga.setUsuario(usuario));
-        //   NUEVO MÉTODO IMPLEMENTADO EN SERVICIO ( BUSCARCOMERCIOPORID()  )
+
+        //  VALIDADANDO COMERCIO Y CHEQUEO DE ESTADO DEL COMERCIO(AUTORIZADO/SUSPENDIDO)
+        //  --------------------- NUEVO MÉTODO IMPLEMENTADO EN SERVICIO ( BUSCARCOMERCIOPORID()  )
         Comercio comercio = serviceComercio.buscarComercioPorId(idComercioRecibido);
-        if(comercio==null){
+        if(comercio==null) {
             throw new RecursoNoEncontradoExcepcion("No se encuentran comercio con el parámetro: " + idComercioRecibido);
+        }else if (comercio.getEstado().equals("Suspendido")){
+            throw new RecursoNoEncontradoExcepcion("El comercio " + idComercioRecibido + " se encuentra suspendido para hacer recargas.");
         }else{
             recarga.setComercio(comercio);
-            logger.info("---------------------> Cuit del comercio: " + comercio.getCuit());
         }
-        // Guardar la recarga y construye la URI de la respuesta
+        // GUARDAR RECARGA Y CONTRUIR LA URI
         try {
-            logger.info("---------------------> Datos de la recarga: " + recarga.toString());
             Recarga recargaGuardada = serviceRecarga.guardar(recarga);
-            //serviceRecarga.guardar(recarga);
-//            if(recargaGuardada==null) {
-//                logger.info("---------------------> Recarga no realizada!! ");
-//                throw new ErrorInternoDelServidorExcepcion("Recarga no realizada ");
-//            }
+            if(recargaGuardada==null) {
+                logger.error("Error al intentar guardar la recarga!!");
+                throw new ErrorInternoDelServidorExcepcion("Recarga no realizada ");
+            }else{
+                logger.info("Recarga guardada con Id " + recarga.getId_recarga() + " - " + recarga.getFecha_hora() );
+            }
+
+            // INYECTA LOS LINKS REQUERIDOS DENTRO DEL OBJETO RECARGA
+            serviceRecarga.inyectarLinkUsuarioYComercio(recarga, usuarioOpt, idComercioRecibido);
 
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                    .path("/{id_Recarga}")
+                    .path(recargaGuardada.getId_recarga().toString())
                     .buildAndExpand(recargaGuardada.getId_recarga())
                     .toUri();
 
             return ResponseEntity.created(location).body(recargaGuardada);
             //return ResponseEntity.status(HttpStatus.CREATED).body("*******************************recargaGuardada");
-        } catch (Exception e) {
+        }catch (Exception e) {
             logger.error("Error al guardar la recarga", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        //return ResponseEntity.created(location).body(recarga);
-        //return new ResponseEntity<>(serviceRecarga.guardar(recarga), HttpStatus.OK);
     }
-
-    private ResponseEntity<?> validation(BindingResult result) {
-        Map<String, String> errors = new HashMap<>();
-        result.getFieldErrors().forEach(fieldError -> {
-            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-        });
-        return ResponseEntity.badRequest().body(errors);
-    }
-
 
 
 }
