@@ -88,6 +88,16 @@ public class ControllerComercio {
 
     }
 
+    @GetMapping("/porId/{id}")
+    public ResponseEntity<?> consultaComerciosPorId(@NotNull @PathVariable Long id) {
+        Comercio comercio = serviceComercio.buscarComercioPorId(id);
+        if (comercio==null)
+            throw new RecursoNoEncontradoExcepcion("No existen comercios con el id: " + id);
+
+        return ResponseEntity.ok(comercio);
+
+    }
+
     @GetMapping("/{Cuit}")
     public ResponseEntity<?> consultaComercio(@PathVariable Long Cuit) {
         Comercio comercio = serviceComercio.buscarComercioPorCuit(Cuit);
