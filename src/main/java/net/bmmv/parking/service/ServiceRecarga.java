@@ -1,10 +1,7 @@
 package net.bmmv.parking.service;
 
 import net.bmmv.parking.controller.ControllerComercio;
-import net.bmmv.parking.controller.ControllerRecarga;
 import net.bmmv.parking.controller.ControllerUsuario;
-import net.bmmv.parking.excepcion.ErrorInternoDelServidorExcepcion;
-import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
 import net.bmmv.parking.model.*;
 import net.bmmv.parking.repository.RepositoryComercio;
 import net.bmmv.parking.repository.RepositoryRecarga;
@@ -16,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -100,10 +96,10 @@ public class ServiceRecarga implements IServiceRecarga  {
         return recargasDTO;
     }
 
-    public Recarga inyectarLinkUsuarioYComercio(Recarga recarga, Optional<Usuario> usuarioOpt, Long idComercioRecibido) {
+    public void inyectarLinkUsuarioYComercio(Recarga recarga, Usuario usuario, Long idComercioRecibido) {
         // link: Link al servicio que permite consultar los datos del usuario
         Link userLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ControllerUsuario.class)
-                .obtenerUsuarioPorId(usuarioOpt.get().getDni())).withRel("Usuario: ");
+                .obtenerUsuarioPorId(usuario.getDni())).withRel("Usuario: ");
         recarga.add(userLink);
 
         // link: Link al servicio que permite consultar los datos del comercio
@@ -113,7 +109,5 @@ public class ServiceRecarga implements IServiceRecarga  {
         recarga.add(comercioLink);
 
 
-
-        return recarga;
     }
 }

@@ -124,14 +124,16 @@ public class ControllerRecarga {
         if(usuarioOpt==null){
             throw new RecursoNoEncontradoExcepcion("Usuario no encontrado con el DNI: " + dniRecibido);
         }
-        usuarioOpt.ifPresent(usuario -> recarga.setUsuario(usuario));
 
         //   VALIDAMOS QUE LA PATENTE A RECARGAR CORRESPONDA A LA DEL USUARIO
-        if(!usuarioOpt.get().getPatente().equals(recarga.getPatente())){
+        if(usuarioOpt.isPresent() && !usuarioOpt.get().getPatente().equals(recarga.getPatente())){
             logger.error("La patente proporcionada no corresponde al usuario!");
             throw new ConflictoDeRecurso("La patente proporcionada no corresponde al usuario!");
         }
-
+        Usuario usuario = usuarioOpt.get();
+        recarga.setUsuario(usuario);
+        // AGREGA EL MONTO DE LA RECARGA AL SALDO DEL USUARIO
+        usuario.setSaldo_cuenta(usuario.getSaldo_cuenta()+recarga.getImporte());
 
         //  VALIDADANDO COMERCIO Y CHEQUEO DE ESTADO DEL COMERCIO(AUTORIZADO/SUSPENDIDO)
         Comercio comercio = serviceComercio.buscarComercioPorId(idComercioRecibido);
@@ -144,7 +146,7 @@ public class ControllerRecarga {
         }else{
             recarga.setComercio(comercio);
         }
-        // GUARDAR RECARGA Y CONTRUIR LA URI
+        // GUARDA RECARGA Y CONTRUYE LA URI
         try {
             Recarga recargaGuardada = serviceRecarga.guardar(recarga);
             if(recargaGuardada==null) {
@@ -153,7 +155,7 @@ public class ControllerRecarga {
             }
             logger.info("Recarga guardada con Id " + recarga.getId_recarga() + " - " + recarga.getFecha_hora() );
              // INYECTA LOS LINKS REQUERIDOS DENTRO DEL OBJETO RECARGA
-            serviceRecarga.inyectarLinkUsuarioYComercio(recarga, usuarioOpt, idComercioRecibido);
+            serviceRecarga.inyectarLinkUsuarioYComercio(recarga, usuario, idComercioRecibido);
 
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path(recargaGuardada.getId_recarga().toString())

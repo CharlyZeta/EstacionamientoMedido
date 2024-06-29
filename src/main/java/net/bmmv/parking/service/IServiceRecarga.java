@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IServiceRecarga {
 
@@ -29,7 +28,7 @@ public interface IServiceRecarga {
     @Transactional
     public Recarga guardar(Recarga recarga) throws Exception;
 
-    public Recarga inyectarLinkUsuarioYComercio(Recarga recarga, Optional<Usuario> usuarioOpt, Long idComercioRecibido);
+    public void inyectarLinkUsuarioYComercio(Recarga recarga, Usuario usuarioOpt, Long idComercioRecibido);
 
     public ResponseEntity<?> validation(BindingResult result);
 
