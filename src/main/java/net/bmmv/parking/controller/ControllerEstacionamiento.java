@@ -1,11 +1,15 @@
 package net.bmmv.parking.controller;
 
 import jakarta.validation.Valid;
+import net.bmmv.parking.excepcion.ConflictoDeRecurso;
 import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
 import net.bmmv.parking.model.Estacionamiento;
+import net.bmmv.parking.model.EstacionamientoDTO;
 import net.bmmv.parking.model.Usuario;
 import net.bmmv.parking.service.IServiceEstacionamiento;
 import net.bmmv.parking.service.IServiceUsuario;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -14,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,42 +35,74 @@ public class ControllerEstacionamiento {
     @Autowired
     private IServiceUsuario serviceUsuario;
 
+    static final Logger logger = LoggerFactory.getLogger(ControllerUsuario.class);
+
     @GetMapping("/")
     public ResponseEntity<List<Estacionamiento>> obtenerEstacionamientos(){
         List<Estacionamiento> todos = serviceEstacionamiento.ListarTodos();
-//        if(todos.isEmpty())
-//            throw new RecursoNoEncontradoExcepcion("No se encontraron registros");
-//        //todos.forEach(e -> logger.info(e.toString()));
-//        for(Estacionamiento est : todos){
-//            String patente = est.getPatente_vehiculo();
-//            // Crea un link a si mismo
-//            Link selfLink = WebMvcLinkBuilder.linkTo(ControllerEstacionamiento.class)
-//                    .slash(est.getPatente_vehiculo())
-//                    .withSelfRel();
-//            est.add(selfLink);
-//            Link parking = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ControllerEstacionamiento.class)
-//                        .getById(usuarioDTO.getPatente()) implementar método en controlador ControllerEstacionamiento
-//                        .withRel("estacionemiento");
-//        }
-
-        for (Estacionamiento estacionamiento : todos) {
-            Link usuarioLink = WebMvcLinkBuilder.linkTo(
-                    WebMvcLinkBuilder.methodOn(ControllerUsuario.class).obtenerUsuarioPorId(estacionamiento.getUsuario().getDni())
-            ).withRel("usuario");
-            estacionamiento.add(usuarioLink);
-
+        serviceEstacionamiento.inyectarLinkAlUsuario(todos);
+        return ResponseEntity.status(HttpStatus.OK).body(todos);
+    }
+    @GetMapping("/patente/{patente}")
+    public ResponseEntity<?> listarEstacionamientosPorPatente(@PathVariable String patente) {
+        List<Estacionamiento> lista = serviceEstacionamiento.BuscarPorPatente(patente).orElseThrow();
+        if (lista.isEmpty()) {
+            throw new RecursoNoEncontradoExcepcion("No se encuentran registros de estacionamiento con la patente: " + patente);
         }
-        return new ResponseEntity<>(todos, HttpStatus.OK);
-
+        serviceEstacionamiento.inyectarLinkAlUsuario(lista);
+        return ResponseEntity.status(HttpStatus.OK).body(lista);
     }
 
-    @PostMapping("/")
-    public ResponseEntity<?> agregarRegistroEstacionamiento(@Valid @RequestBody Estacionamiento estacionamiento, BindingResult result){
-        if (result.hasFieldErrors()){
+    @PostMapping("/ocupaylibera")
+    public ResponseEntity<?> agregarRegistroEstacionamiento(@Valid @RequestBody EstacionamientoDTO dto, BindingResult result) throws Exception {
+        if (result.hasFieldErrors()) {
             return validation(result);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(serviceEstacionamiento.guardarEstacionamiento(estacionamiento));
+        String contrasenaRecibida = dto.getContrasena();
+        String patenteRecibida = dto.getPatente();
+        Optional<Usuario> userEstacionamiento = serviceUsuario.buscarUsuarioPorPatente(patenteRecibida);
+
+        // Busca si existe un registro cargado para esta patente con estado "Ocupado"
+        Optional<Estacionamiento> estacionamientoOcupado = serviceEstacionamiento.buscarPorPatenteyEstado(patenteRecibida, "Ocupado");
+
+        // Si existe registro de la patente buscada con estado OCUPADO, se lo libera y se guarda hora de finalización
+        if (estacionamientoOcupado.isPresent()) {
+            Estacionamiento estacionamiento = estacionamientoOcupado.get();
+            LocalDateTime horaFin = LocalDateTime.now();
+            horaFin.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
+            estacionamiento.setFecha_hora_fin(horaFin);
+            estacionamiento.setEstadoLibre();
+            estacionamiento.setId_estacionamiento(estacionamientoOcupado.get().getId_estacionamiento());
+            // Link al listado de estacionamientos con esa patente
+            serviceEstacionamiento.inyectarLinkAlUsuario(estacionamiento);
+            logger.info("Registro de estacionamiento modificado para la patente " + patenteRecibida + " con estado LIBRE - " + horaFin.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")));
+            return ResponseEntity.status(HttpStatus.OK).body(serviceEstacionamiento.guardarEstacionamiento(estacionamiento));
+          // si no se encuentra registro estacionamiento de esa patente pero se verifica que es de un usuario activo
+        } else if (userEstacionamiento.isPresent()) {
+            if (userEstacionamiento.get().getContrasena().equals(contrasenaRecibida)) { //se compara la contraseña del usuario con la presentada en activacion o corte de estacionameinto
+                Estacionamiento estacionamientoNuevo = new Estacionamiento();
+                estacionamientoNuevo.setPatente(dto.getPatente());
+                estacionamientoNuevo.setEstadoOcupado();
+                estacionamientoNuevo.setFecha_hora_inicio(LocalDateTime.now());
+                estacionamientoNuevo.setUsuario(userEstacionamiento.get());
+
+                // Link al listado de estacionamientos con esa patente
+                serviceEstacionamiento.inyectarLinkAlUsuario(dto);
+                dto.setEstadoOcupado();
+                dto.setContrasena("Contraseña aceptada");
+                serviceEstacionamiento.guardarEstacionamiento(estacionamientoNuevo);
+                logger.info("Registro de estacionamiento creado para la patente " + patenteRecibida + " con estado OCUPADO");
+                return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+            } else {
+                logger.error("Contraseña incorrecta!");
+                throw new ConflictoDeRecurso("Contraseña incorrecta");
+            }
+        } else {
+            logger.error("No se encuentra usuario con la patente: " + patenteRecibida);
+            throw new RecursoNoEncontradoExcepcion("No se encuentra usuario con la patente: " + patenteRecibida);
+        }
     }
+
 
 
     private ResponseEntity<?> validation(BindingResult result) {

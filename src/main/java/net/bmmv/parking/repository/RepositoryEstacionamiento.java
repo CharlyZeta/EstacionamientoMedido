@@ -6,10 +6,13 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 //@RepositoryRestResource(path = "estacionamiento")
 public interface RepositoryEstacionamiento extends JpaRepository<Estacionamiento, Long> {
 
-    //public List<Estacionamiento> findAllByPatentevehiculo(String patente);
+    public Optional<List<Estacionamiento>> findAllByPatente(String patente);
+
+    public Optional<Estacionamiento> findEstacionamientoByPatenteAndEstado(String patente, String estado);
 
 }

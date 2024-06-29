@@ -19,8 +19,8 @@ public class ParkingApplication {
 	@Bean
 	public CommandLineRunner commandLineRunner() {
 		return args -> {
-			//usuariosFaker users = new usuariosFaker();
-			//usuariosFaker.generateUsuarios(10);
+//			usuariosFaker users = new usuariosFaker();
+//			usuariosFaker.generateUsuarios(15);
 
 
 		};
