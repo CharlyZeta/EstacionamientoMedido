@@ -1,6 +1,7 @@
 package net.bmmv.parking.controller;
 
 import jakarta.validation.Valid;
+import net.bmmv.parking.excepcion.ConflictoDeRecurso;
 import net.bmmv.parking.excepcion.ErrorInternoDelServidorExcepcion;
 import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
 import net.bmmv.parking.model.Comercio;
@@ -125,12 +126,20 @@ public class ControllerRecarga {
         }
         usuarioOpt.ifPresent(usuario -> recarga.setUsuario(usuario));
 
+        //   VALIDAMOS QUE LA PATENTE A RECARGAR CORRESPONDA A LA DEL USUARIO
+        if(!usuarioOpt.get().getPatente().equals(recarga.getPatente())){
+            logger.error("La patente proporcionada no corresponde al usuario!");
+            throw new ConflictoDeRecurso("La patente proporcionada no corresponde al usuario!");
+        }
+
+
         //  VALIDADANDO COMERCIO Y CHEQUEO DE ESTADO DEL COMERCIO(AUTORIZADO/SUSPENDIDO)
-        //  --------------------- NUEVO MÉTODO IMPLEMENTADO EN SERVICIO ( BUSCARCOMERCIOPORID()  )
         Comercio comercio = serviceComercio.buscarComercioPorId(idComercioRecibido);
         if(comercio==null) {
+            logger.error("No se encuentran comercio con el parámetro: " + idComercioRecibido);
             throw new RecursoNoEncontradoExcepcion("No se encuentran comercio con el parámetro: " + idComercioRecibido);
         }else if (comercio.getEstado().equals("Suspendido")){
+            logger.error("El comercio " + idComercioRecibido + " se encuentra suspendido para hacer recargas.");
             throw new RecursoNoEncontradoExcepcion("El comercio " + idComercioRecibido + " se encuentra suspendido para hacer recargas.");
         }else{
             recarga.setComercio(comercio);
@@ -140,12 +149,10 @@ public class ControllerRecarga {
             Recarga recargaGuardada = serviceRecarga.guardar(recarga);
             if(recargaGuardada==null) {
                 logger.error("Error al intentar guardar la recarga!!");
-                throw new ErrorInternoDelServidorExcepcion("Recarga no realizada ");
-            }else{
-                logger.info("Recarga guardada con Id " + recarga.getId_recarga() + " - " + recarga.getFecha_hora() );
+                throw new ErrorInternoDelServidorExcepcion("Error al intentar guardar la recarga!!");
             }
-
-            // INYECTA LOS LINKS REQUERIDOS DENTRO DEL OBJETO RECARGA
+            logger.info("Recarga guardada con Id " + recarga.getId_recarga() + " - " + recarga.getFecha_hora() );
+             // INYECTA LOS LINKS REQUERIDOS DENTRO DEL OBJETO RECARGA
             serviceRecarga.inyectarLinkUsuarioYComercio(recarga, usuarioOpt, idComercioRecibido);
 
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -154,7 +161,6 @@ public class ControllerRecarga {
                     .toUri();
 
             return ResponseEntity.created(location).body(recargaGuardada);
-            //return ResponseEntity.status(HttpStatus.CREATED).body("*******************************recargaGuardada");
         }catch (Exception e) {
             logger.error("Error al guardar la recarga", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
