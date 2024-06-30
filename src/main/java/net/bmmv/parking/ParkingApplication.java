@@ -6,23 +6,21 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.util.ResourceUtils;
+
+import java.awt.*;
+import java.io.File;
+import java.net.URI;
+import java.net.URL;
 
 @SpringBootApplication
 public class ParkingApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ParkingApplication.class, args);
-	}
-
-	@Autowired
-	private  usuariosFaker usuariosFaker;
-	@Bean
-	public CommandLineRunner commandLineRunner() {
-		return args -> {
-//			usuariosFaker users = new usuariosFaker();
-//			usuariosFaker.generateUsuarios(15);
+		{
 
 
-		};
+		}
 	}
 }
