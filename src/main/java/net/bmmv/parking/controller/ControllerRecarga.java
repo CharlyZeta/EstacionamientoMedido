@@ -1,5 +1,6 @@
 package net.bmmv.parking.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import net.bmmv.parking.excepcion.ConflictoDeRecurso;
 import net.bmmv.parking.excepcion.ErrorInternoDelServidorExcepcion;
@@ -40,6 +41,7 @@ public class ControllerRecarga {
     @Autowired
     private IServiceUsuario serviceUsuario;
 
+    @Operation(summary = "Listar todas las recargas")
     @GetMapping(value="/", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RecargaDTO>> obtenerRecargas() throws Exception {
         var recargas = serviceRecarga.listarTodas();
@@ -50,6 +52,7 @@ public class ControllerRecarga {
         return new ResponseEntity<>(serviceRecarga.convertirARecargaDTO(recargas), HttpStatus.OK);
     }
 
+    @Operation(summary = "Listar recargas por Id")
     @GetMapping(value="/{id}", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<RecargaDTO> obteneRecargaPorId(@Valid @PathVariable Long id) throws Exception {
         Recarga recarga = serviceRecarga.buscarRecargaPorId(id);
@@ -60,6 +63,7 @@ public class ControllerRecarga {
         return new ResponseEntity<>(serviceRecarga.devuelveRecargaDTO(recarga), HttpStatus.OK);
     }
 
+    @Operation(summary = "Listar recargas por patente")
     @GetMapping(value="/patente/{patente}", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RecargaDTO>> obtenerRecargasPorPatente(@PathVariable String patente) throws Exception {
         var recargas = serviceRecarga.listarPorPatente(patente);
@@ -75,6 +79,7 @@ public class ControllerRecarga {
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
 
+    @Operation(summary = "Listar recargas por DNI")
     @GetMapping(value = "/dni/{dni}", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RecargaDTO>> obtenerRecargasPorDniUsuario(@PathVariable Long dni) throws Exception {
         var recargas = serviceRecarga.listarPorUsuario(dni);
@@ -89,6 +94,7 @@ public class ControllerRecarga {
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
 
+    @Operation(summary = "Listar recargas por CUIT de comercio")
     @GetMapping( value="/comercio/{cuit}", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RecargaDTO>> obtenerRecargasPorComercio(@PathVariable Long cuit) throws Exception {
         logger.info(cuit.toString());
@@ -108,7 +114,7 @@ public class ControllerRecarga {
         return new ResponseEntity<>(recargasDTO, HttpStatus.OK);
     }
 
-
+    @Operation(summary = "Registrar recarga con comercio y DNI del usuario")
     @PostMapping("/nueva/{idComercioRecibido}/{dniRecibido}")
     public ResponseEntity<?> guardar(@Valid @RequestBody Recarga recarga, BindingResult result,
                                      @PathVariable Long idComercioRecibido,
