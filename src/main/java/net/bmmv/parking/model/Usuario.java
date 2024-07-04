@@ -2,6 +2,7 @@ package net.bmmv.parking.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -15,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Hidden
 @ToString
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
 @Table(name="usuarios", uniqueConstraints = @UniqueConstraint(columnNames = "dni" ))

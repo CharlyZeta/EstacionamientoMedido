@@ -1,6 +1,7 @@
 package net.bmmv.parking.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -8,6 +9,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
 
+@Hidden
 @EqualsAndHashCode(callSuper = true)
 @Data
 @ToString

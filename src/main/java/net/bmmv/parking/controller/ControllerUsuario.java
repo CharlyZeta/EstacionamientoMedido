@@ -1,5 +1,7 @@
 package net.bmmv.parking.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import net.bmmv.parking.excepcion.ConflictoDeRecurso;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.TypedEntityLinks;
@@ -30,6 +32,7 @@ import java.util.Optional;
 import static org.springframework.hateoas.server.core.DummyInvocationUtils.methodOn;
 import static org.springframework.hateoas.server.core.WebHandler.linkTo;
 
+
 @RestController
 @RequestMapping("/usuarios")
 @CrossOrigin(value = "http://localhost:3000")   //para frontend en React
@@ -40,6 +43,7 @@ public class ControllerUsuario {
     @Autowired
     private IServiceUsuario serviceUsuario;
 
+    @Operation(summary = "Permite listar todos los usuarios")
     @GetMapping(value="/", produces = { MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<UsuarioDTO>> obtenerUsuarios() throws Exception{
         List<Usuario> usuarios = serviceUsuario.ListarUsuarios();
@@ -52,13 +56,10 @@ public class ControllerUsuario {
         return new ResponseEntity<>(serviceUsuario.convertirAUsuarioDTO(usuarios), HttpStatus.OK);
     }
 
-
-
-
+    @Operation(summary = "Permite listar usuarios por DNI")
     @GetMapping("/{Dni}")
     public ResponseEntity<?> obtenerUsuarioPorId(@PathVariable Long Dni){
         Usuario usuario = serviceUsuario.buscarUsuarioPorDni(Dni);
-
 
         if(usuario == null)
             throw new RecursoNoEncontradoExcepcion("No se encontró el usuario con el DNI: " + Dni);
@@ -67,6 +68,7 @@ public class ControllerUsuario {
         return ResponseEntity.status(HttpStatus.OK).body(serviceUsuario.devuelveUsuarioDTO(usuario));
     }
 
+    @Operation(summary = "Permite crear usuarios")
     @PostMapping("/")
     public ResponseEntity<?> agregarUsuario(@Valid @RequestBody Usuario usuario, BindingResult result){
         if (result.hasFieldErrors()){
@@ -76,6 +78,7 @@ public class ControllerUsuario {
         throw new ConflictoDeRecurso("El DNI ya existe!");
     }
 
+    @Operation(summary = "Permite modificar los datos del usuario")
     @PutMapping("/{Dni}")
     public ResponseEntity<?> actualizarEmpleado(@Valid @RequestBody Usuario usuarioRecibido, BindingResult result, @PathVariable Long Dni){
         if (result.hasFieldErrors()){
@@ -109,6 +112,8 @@ public class ControllerUsuario {
 
 
 
+    @Hidden
+    @Operation(summary = "Permite eliminar un usuario")
     @DeleteMapping("/{dni}")
     public ResponseEntity<?> eliminar(@PathVariable("dni") Long dni) {
         Usuario usuario = serviceUsuario.buscarUsuarioPorDni(dni);
@@ -123,6 +128,9 @@ public class ControllerUsuario {
                 + usuario.getDni() );
         return ResponseEntity.ok("Usuario con DNI " + dni + " eliminado correctamente.");
     }
+
+    @Hidden
+    @Operation(summary = "Controla que no se ejecute un método DELETE a una lista de usuarios")
     @DeleteMapping("/")
     public ResponseEntity<?> eliminarTodo(@PathVariable Optional<Long> dni){
             logger.error("Método no permitido para esta operación");
@@ -130,6 +138,7 @@ public class ControllerUsuario {
 
     }
 
+    @Hidden
     private ResponseEntity<?> validation(BindingResult result) {
         Map<String, String> errors = new HashMap<>();
         result.getFieldErrors().forEach(fieldError -> {

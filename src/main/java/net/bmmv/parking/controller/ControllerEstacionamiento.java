@@ -1,5 +1,7 @@
 package net.bmmv.parking.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import net.bmmv.parking.excepcion.ConflictoDeRecurso;
 import net.bmmv.parking.excepcion.RecursoNoEncontradoExcepcion;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
 @RestController
 @RequestMapping("/estacionamiento")
 @CrossOrigin(value = "http://localhost:3000")   //para frontend en React
@@ -37,12 +40,15 @@ public class ControllerEstacionamiento {
 
     static final Logger logger = LoggerFactory.getLogger(ControllerUsuario.class);
 
+    @Operation(summary = "Permite listar los registros de estacionamiento")
     @GetMapping("/")
     public ResponseEntity<List<Estacionamiento>> obtenerEstacionamientos(){
         List<Estacionamiento> todos = serviceEstacionamiento.ListarTodos();
         serviceEstacionamiento.inyectarLinkAlUsuario(todos);
         return ResponseEntity.status(HttpStatus.OK).body(todos);
     }
+
+    @Operation(summary = "Permite listar estacionameintos por patente")
     @GetMapping("/patente/{patente}")
     public ResponseEntity<?> listarEstacionamientosPorPatente(@PathVariable String patente) {
         List<Estacionamiento> lista = serviceEstacionamiento.BuscarPorPatente(patente).orElseThrow();
@@ -53,6 +59,7 @@ public class ControllerEstacionamiento {
         return ResponseEntity.status(HttpStatus.OK).body(lista);
     }
 
+    @Operation(summary = "Permite Ocupar y liberar un estacionamiento dependiendo de su estado")
     @PostMapping("/ocupaylibera")
     public ResponseEntity<?> agregarRegistroEstacionamiento(@Valid @RequestBody EstacionamientoDTO dto, BindingResult result) throws Exception {
         if (result.hasFieldErrors()) {
@@ -105,6 +112,7 @@ public class ControllerEstacionamiento {
 
 
 
+    @Hidden
     private ResponseEntity<?> validation(BindingResult result) {
         Map<String, String> errors = new HashMap<>();
         result.getFieldErrors().forEach(fieldError -> {

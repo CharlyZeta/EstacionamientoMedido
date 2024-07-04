@@ -1,6 +1,7 @@
 package net.bmmv.parking.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Hidden
 @Table(name="comercios", uniqueConstraints = @UniqueConstraint(columnNames = "cuit" ))
 public class Comercio extends RepresentationModel<Comercio> {
     @Id

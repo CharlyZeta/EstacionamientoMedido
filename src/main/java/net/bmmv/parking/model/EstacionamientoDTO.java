@@ -1,6 +1,7 @@
 package net.bmmv.parking.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
+@Hidden
 public class EstacionamientoDTO extends RepresentationModel<EstacionamientoDTO> {
 
     @JsonIgnore
